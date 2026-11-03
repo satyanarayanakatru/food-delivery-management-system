@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import ConfirmModal from '../components/common/ConfirmModal'
 
 const AuthContext = createContext(null)
 
@@ -16,6 +18,9 @@ const INITIAL_DEMO_USER = {
 }
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate()
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('foodbite_user')
@@ -129,11 +134,18 @@ export const AuthProvider = ({ children }) => {
     return { success: true }
   }
 
-  // Logout
+  // Open Sign Out Confirmation Box
+  const requestLogout = () => {
+    setIsLogoutModalOpen(true)
+  }
+
+  // Actual Logout handler executed on confirmation
   const logout = () => {
     setCurrentUser(null)
     localStorage.removeItem('foodbite_user')
+    setIsLogoutModalOpen(false)
     toast.info('Signed out successfully.')
+    navigate('/login')
   }
 
   // Update profile
@@ -157,11 +169,28 @@ export const AuthProvider = ({ children }) => {
     register,
     resetPassword,
     logout,
+    requestLogout,
     updateUserProfile,
     demoUser: INITIAL_DEMO_USER
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+
+      {/* Global Sign Out Confirmation Box */}
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={logout}
+        title="Confirm Sign Out"
+        message="Are you sure you want to sign out of FoodBite Express? Your active session will be securely ended."
+        confirmText="Sign Out"
+        cancelText="Stay Logged In"
+        isDanger={true}
+      />
+    </AuthContext.Provider>
+  )
 }
 
 export const useAuth = () => {

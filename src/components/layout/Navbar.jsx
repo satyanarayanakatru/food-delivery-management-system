@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { 
   UtensilsCrossed, 
   LogOut, 
@@ -9,22 +9,19 @@ import {
   ShieldCheck, 
   ChevronDown,
   LayoutDashboard,
-  Radio,
-  Sparkles
+  Radio
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 export default function Navbar() {
-  const { currentUser, isAuthenticated, logout } = useAuth()
+  const { currentUser, isAuthenticated, requestLogout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
-  const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
+  const handleSignoutClick = () => {
     setUserDropdownOpen(false)
     setMobileMenuOpen(false)
-    navigate('/login')
+    requestLogout()
   }
 
   return (
@@ -107,8 +104,8 @@ export default function Navbar() {
 
                       <div className="pt-1 border-t border-slate-800">
                         <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                          onClick={handleSignoutClick}
+                          className="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors cursor-pointer"
                         >
                           <LogOut className="w-3.5 h-3.5" />
                           <span>Sign Out</span>
@@ -175,10 +172,10 @@ export default function Navbar() {
                 <span>Dashboard</span>
               </Link>
               <button
-                onClick={handleLogout}
+                onClick={handleSignoutClick}
                 className="w-full text-left py-2.5 px-3 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/10 flex items-center gap-2"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
               </button>
             </>
