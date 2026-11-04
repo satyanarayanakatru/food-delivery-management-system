@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, Mail, Lock, User, Phone, UserPlus, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, Phone, UserPlus, AlertCircle, Shield, ShoppingBag } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordStrengthMeter from '../../components/auth/PasswordStrengthMeter'
@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [accountRole, setAccountRole] = useState('customer')
   const { register: registerUser } = useAuth()
   const navigate = useNavigate()
 
@@ -38,7 +39,8 @@ export default function RegisterPage() {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        password: data.password
+        password: data.password,
+        role: accountRole
       })
 
       if (res.success) {
@@ -52,8 +54,37 @@ export default function RegisterPage() {
   return (
     <AuthLayout
       title="Create Account"
-      subtitle="Register your account to access the Food Delivery Management portal"
+      subtitle="Register your credentials to access the Food Delivery Management portal"
     >
+      {/* Account Role Selector */}
+      <div className="mb-5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 flex gap-1">
+        <button
+          type="button"
+          onClick={() => setAccountRole('customer')}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            accountRole === 'customer'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Customer</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setAccountRole('admin')}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            accountRole === 'admin'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Shield className="w-3.5 h-3.5" />
+          <span>Admin</span>
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5" noValidate>
         {/* Full Name */}
         <div>
@@ -268,14 +299,18 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-[0.99] text-white text-sm font-bold transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 disabled:opacity-60"
+          className={`w-full mt-2 py-3 px-4 rounded-xl text-white text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.99] ${
+            accountRole === 'admin'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-500/25'
+              : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25'
+          }`}
         >
           {isSubmitting ? (
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
           ) : (
             <>
               <UserPlus className="w-4 h-4" />
-              <span>Create Account</span>
+              <span>Create {accountRole === 'admin' ? 'Admin' : 'Customer'} Account</span>
             </>
           )}
         </button>

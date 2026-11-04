@@ -18,15 +18,15 @@ export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
   const { currentUser, requestLogout } = useAuth()
 
-  // Clean navigation links without any "mod3", "mod4" text badges
+  // Distinct routes for each sidebar option to prevent multi-highlighting
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, active: true },
-    { name: 'Restaurants', path: '/dashboard', icon: Store, active: false },
-    { name: 'Menu Catalog', path: '/dashboard', icon: MenuSquare, active: false },
-    { name: 'Cart & Orders', path: '/dashboard', icon: ShoppingCart, active: false },
-    { name: 'Customer Profile', path: '/dashboard', icon: UserCheck, active: false },
-    { name: 'Coupons & Payment', path: '/dashboard', icon: CreditCard, active: false },
-    { name: 'Order History', path: '/dashboard', icon: History, active: false },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Restaurants', path: '/restaurants', icon: Store },
+    { name: 'Menu Catalog', path: '/menu', icon: MenuSquare },
+    { name: 'Cart & Orders', path: '/orders', icon: ShoppingCart },
+    { name: 'Customer Profile', path: '/profile', icon: UserCheck },
+    { name: 'Coupons & Payment', path: '/payments', icon: CreditCard },
+    { name: 'Order History', path: '/history', icon: History },
   ]
 
   return (
@@ -77,7 +77,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </span>
             {navItems.map((item, idx) => {
               const Icon = item.icon
-              const isSelected = item.active
+              const isSelected = location.pathname === item.path
               return (
                 <Link
                   key={idx}
@@ -115,7 +115,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           <button
             onClick={requestLogout}
-            className="w-full py-2.5 px-3 rounded-xl text-xs font-semibold text-red-400 hover:text-white hover:bg-red-500/10 border border-red-500/20 transition-colors flex items-center justify-center gap-2 active:scale-95"
+            className="w-full py-2.5 px-3 rounded-xl text-xs font-semibold text-red-400 hover:text-white hover:bg-red-500/10 border border-red-500/20 transition-colors flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out Session</span>

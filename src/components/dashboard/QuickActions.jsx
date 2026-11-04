@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   Store, 
   MenuSquare, 
@@ -6,12 +7,14 @@ import {
   BellRing, 
   Download, 
   RotateCw, 
-  Sparkles,
+  Sparkles, 
   ArrowRight
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 export default function QuickActions({ onSimulateOrder, onRefreshData, isRefreshing }) {
+  const navigate = useNavigate()
+
   const handleExportData = () => {
     toast.success('Financial Revenue Summary (CSV/PDF) generated successfully!', {
       icon: '📊'
@@ -19,7 +22,7 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
   }
 
   const handleNavigateModule = (moduleName) => {
-    toast.info(`${moduleName} will be fully activated in the next step!`, {
+    toast.info(`${moduleName} will be activated in the next step!`, {
       icon: '🚀'
     })
   }
@@ -28,10 +31,10 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
     {
       id: 1,
       title: 'Explore Restaurants',
-      desc: '38 Active partnered kitchens & restaurants',
+      desc: 'Browse partner restaurants, cuisines & ratings',
       icon: Store,
       color: 'from-orange-500 to-amber-500',
-      action: () => handleNavigateModule('Module 3: Restaurant Listing')
+      action: () => navigate('/restaurants')
     },
     {
       id: 2,
@@ -39,12 +42,12 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
       desc: '284 Curated dishes, categories & dietary filters',
       icon: MenuSquare,
       color: 'from-emerald-500 to-teal-500',
-      action: () => handleNavigateModule('Module 4: Menu Management')
+      action: () => navigate('/menu')
     },
     {
       id: 3,
-      title: 'Simulate Live Dispatch',
-      desc: 'Inject real-time incoming order & assign rider',
+      title: 'Simulate Customer Order',
+      desc: 'Simulate an incoming customer order alert',
       icon: BellRing,
       color: 'from-blue-500 to-cyan-500',
       action: onSimulateOrder
@@ -68,14 +71,14 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
             Quick Action Cards
           </h3>
           <p className="text-xs text-slate-400">
-            Instant operations, system triggers & module shortcuts
+            Instant operations, platform triggers & quick shortcuts
           </p>
         </div>
 
         <button
           onClick={onRefreshData}
           disabled={isRefreshing}
-          className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors inline-flex items-center gap-1.5 active:scale-95 disabled:opacity-60"
+          className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors inline-flex items-center gap-1.5 active:scale-95 disabled:opacity-60 cursor-pointer"
         >
           <RotateCw className={`w-3.5 h-3.5 text-orange-400 ${isRefreshing ? 'animate-spin' : ''}`} />
           <span>{isRefreshing ? 'Syncing...' : 'Sync Data'}</span>
@@ -89,7 +92,7 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
             <button
               key={act.id}
               onClick={act.action}
-              className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 text-left transition-all duration-200 group hover:-translate-y-0.5 shadow-lg shadow-black/20 backdrop-blur-md relative overflow-hidden flex flex-col justify-between"
+              className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 text-left transition-all duration-200 group hover:-translate-y-0.5 shadow-lg shadow-black/20 backdrop-blur-md relative overflow-hidden flex flex-col justify-between cursor-pointer"
             >
               <div>
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${act.color} text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-105 transition-transform`}>

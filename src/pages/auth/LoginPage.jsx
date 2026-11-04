@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, Mail, Lock, LogIn, Sparkles, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, LogIn, AlertCircle, Shield, ShoppingBag, Zap } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/auth/AuthLayout'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login, demoUser } = useAuth()
+  const [selectedRole, setSelectedRole] = useState('admin') // 'admin' or 'customer'
+  const { login, loginAsAdmin, loginAsCustomer, demoAdmin, demoCustomer } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -16,56 +17,142 @@ export default function LoginPage() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: {
-      email: '',
-      password: '',
+      email: demoAdmin.email,
+      password: demoAdmin.password,
       rememberMe: true
     }
   })
 
+  // Pre-fill on role change
+  useEffect(() => {
+    if (selectedRole === 'admin') {
+      setValue('email', demoAdmin.email, { shouldValidate: true, shouldDirty: true })
+      setValue('password', demoAdmin.password, { shouldValidate: true, shouldDirty: true })
+    } else {
+      setValue('email', demoCustomer.email, { shouldValidate: true, shouldDirty: true })
+      setValue('password', demoCustomer.password, { shouldValidate: true, shouldDirty: true })
+    }
+  }, [selectedRole, setValue, demoAdmin, demoCustomer])
+
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     try {
-      const res = login(data.email, data.password)
-      if (res.success) {
-        const destination = location.state?.from?.pathname || '/dashboard'
-        navigate(destination, { replace: true })
+      const targetEmail = data.email || (selectedRole === 'admin' ? demoAdmin.email : demoCustomer.email)
+      const targetPassword = data.password || (selectedRole === 'admin' ? demoAdmin.password : demoCustomer.password)
+
+      const res = login(targetEmail, targetPassword)
+      if (res?.success) {
+        navigate('/dashboard', { replace: true })
       }
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleAutofillDemo = () => {
-    setValue('email', demoUser.email, { shouldValidate: true })
-    setValue('password', demoUser.password, { shouldValidate: true })
+  const handleSelectRole = (role) => {
+    setSelectedRole(role)
+    if (role === 'admin') {
+      setValue('email', demoAdmin.email, { shouldValidate: true })
+      setValue('password', demoAdmin.password, { shouldValidate: true })
+    } else {
+      setValue('email', demoCustomer.email, { shouldValidate: true })
+      setValue('password', demoCustomer.password, { shouldValidate: true })
+    }
+  }
+
+  const handleDirectAdminLogin = () => {
+    const res = loginAsAdmin()
+    if (res?.success) {
+      navigate('/dashboard', { replace: true })
+    }
+  }
+
+  const handleDirectCustomerLogin = () => {
+    const res = loginAsCustomer()
+    if (res?.success) {
+      navigate('/dashboard', { replace: true })
+    }
   }
 
   return (
     <AuthLayout
       title="Portal Sign In"
-      subtitle="Enter your account credentials to access FoodBite Express"
+      subtitle="Select Admin or Customer portal to sign in"
     >
-      {/* Single Demo Account Autofill Card */}
-      <div className="mb-6 p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between gap-3">
-        <div className="text-xs">
-          <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Demo Portal Account</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
-            demo@foodbite.com &bull; Password123!
-          </p>
-        </div>
+      {/* Dual Portal Switcher Tabs */}
+      <div className="mb-5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 flex gap-1">
+        <button
+          type="button"
+          onClick={() => handleSelectRole('admin')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            selectedRole === 'admin'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Shield className="w-3.5 h-3.5" />
+          <span>Admin Portal</span>
+        </button>
 
         <button
           type="button"
-          onClick={handleAutofillDemo}
-          className="px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-95 text-white transition-all shadow-md shadow-orange-500/20 shrink-0"
+          onClick={() => handleSelectRole('customer')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            selectedRole === 'customer'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
         >
-          Auto Fill
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Customer Portal</span>
+        </button>
+      </div>
+
+      {/* Role Credentials Info Pill */}
+      <div className="mb-5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-between text-xs">
+        <div>
+          <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+            Sign In As
+          </span>
+          <p className="font-bold text-white text-xs mt-0.5">
+            {selectedRole === 'admin' ? demoAdmin.name : demoCustomer.name}
+          </p>
+          <p className="text-[11px] text-orange-400 font-mono">
+            {selectedRole === 'admin' ? demoAdmin.email : demoCustomer.email}
+          </p>
+        </div>
+        <span
+          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+            selectedRole === 'admin'
+              ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+          }`}
+        >
+          {selectedRole}
+        </span>
+      </div>
+
+      {/* 1-Click Quick Demo Sign In Buttons */}
+      <div className="grid grid-cols-2 gap-2 mb-5">
+        <button
+          type="button"
+          onClick={handleDirectAdminLogin}
+          className="py-2.5 px-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm"
+        >
+          <Zap className="w-3.5 h-3.5 text-orange-400" />
+          <span>Fast Admin Sign In</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleDirectCustomerLogin}
+          className="py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm"
+        >
+          <Zap className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Fast Customer Sign In</span>
         </button>
       </div>
 
@@ -82,7 +169,7 @@ export default function LoginPage() {
             <input
               type="email"
               autoComplete="email"
-              placeholder="e.g. demo@foodbite.com"
+              placeholder={selectedRole === 'admin' ? 'admin@foodbite.com' : 'customer@foodbite.com'}
               {...register('email', {
                 required: 'Email is required',
                 pattern: {
@@ -172,14 +259,18 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-[0.99] text-white text-sm font-bold transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 disabled:opacity-60"
+          className={`w-full mt-2 py-3 px-4 rounded-xl text-white text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.99] cursor-pointer ${
+            selectedRole === 'admin'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-500/25'
+              : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25'
+          }`}
         >
           {isSubmitting ? (
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
           ) : (
             <>
               <LogIn className="w-4 h-4" />
-              <span>Sign In to Dashboard</span>
+              <span>Enter {selectedRole === 'admin' ? 'Admin' : 'Customer'} Portal</span>
             </>
           )}
         </button>

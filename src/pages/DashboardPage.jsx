@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { 
   Store, 
   MenuSquare, 
@@ -9,52 +10,71 @@ import {
   DollarSign, 
   Menu, 
   Bell, 
-  Radio, 
-  RotateCw,
-  Sparkles,
-  ArrowRight,
-  TrendingUp,
-  ShieldCheck
+  RotateCw, 
+  Sparkles, 
+  ArrowRight, 
+  Shield, 
+  Heart, 
+  Gift, 
+  Clock, 
+  PlusCircle, 
+  RefreshCw 
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
-import RealtimeTicker from '../components/common/RealtimeTicker'
 import Sidebar from '../components/layout/Sidebar'
 import StatCard from '../components/dashboard/StatCard'
 import RevenueChart from '../components/dashboard/RevenueChart'
 import RecentOrdersTable from '../components/dashboard/RecentOrdersTable'
 import OrderDetailsModal from '../components/dashboard/OrderDetailsModal'
 import QuickActions from '../components/dashboard/QuickActions'
+import AddRestaurantModal from '../components/restaurants/AddRestaurantModal'
 import { INITIAL_DASHBOARD_STATS, INITIAL_RECENT_ORDERS } from '../data/mockDashboardData'
 
 export default function DashboardPage() {
-  const { currentUser, requestLogout } = useAuth()
+  const { currentUser, isAdmin, isCustomer } = useAuth()
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [stats, setStats] = useState(INITIAL_DASHBOARD_STATS)
-  const [orders, setOrders] = useState(INITIAL_RECENT_ORDERS)
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('foodbite_recent_orders')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.length > 0) return parsed
+      }
+      return INITIAL_RECENT_ORDERS
+    } catch (e) {
+      return INITIAL_RECENT_ORDERS
+    }
+  })
   const [selectedOrder, setSelectedOrder] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+  const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [lastSyncTime, setLastSyncTime] = useState(new Date().toLocaleTimeString())
 
-  // Realtime heartbeat simulation
+  // Update total restaurants count if custom restaurants exist
   useEffect(() => {
-    const timer = setInterval(() => {
-      setLastSyncTime(new Date().toLocaleTimeString())
-    }, 4000)
-    return () => clearInterval(timer)
+    try {
+      const custom = JSON.parse(localStorage.getItem('foodbite_custom_restaurants') || '[]')
+      if (custom.length > 0) {
+        setStats((prev) => ({
+          ...prev,
+          totalRestaurants: INITIAL_DASHBOARD_STATS.totalRestaurants + custom.length
+        }))
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }, [])
 
-  // Sync / Refresh data with skeleton loader
+  // Sync / Refresh data
   const handleRefreshData = () => {
     setIsLoading(true)
     setTimeout(() => {
       setIsLoading(false)
-      setLastSyncTime(new Date().toLocaleTimeString())
-      toast.success('Dashboard metrics synchronized with live gateway!', {
-        icon: '🔄'
-      })
-    }, 700)
+      toast.success('Dashboard metrics synchronized!', { icon: '🔄' })
+    }, 600)
   }
 
   // Simulate an incoming live order
@@ -67,9 +87,9 @@ export default function DashboardPage() {
     const newOrder = {
       id: newOrderId,
       customer: {
-        name: 'Rachel Adams',
-        email: 'rachel.a@example.com',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+        name: currentUser?.name || 'Sarah Connor',
+        email: currentUser?.email || 'customer@foodbite.com',
+        avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
         phone: '+1 (555) 789-2345',
         address: '612 Broadway, Floor 8'
       },
@@ -84,7 +104,14 @@ export default function DashboardPage() {
       rider: 'Marcus Vance'
     }
 
-    setOrders((prev) => [newOrder, ...prev])
+    setOrders((prev) => {
+      const updated = [newOrder, ...prev]
+      try {
+        localStorage.setItem('foodbite_recent_orders', JSON.stringify(updated))
+      } catch (e) {}
+      return updated
+    })
+
     setStats((prev) => ({
       ...prev,
       totalOrders: prev.totalOrders + 1,
@@ -96,26 +123,36 @@ export default function DashboardPage() {
     }))
 
     toast.success(
-      `🔔 New Order Received: ${newOrderId} ($40.50) from ${newOrder.customer.name}!`,
+      `Order ${newOrderId} ($40.50) received from ${newOrder.customer.name}!`,
       { icon: '🍔' }
     )
   }
 
+  const handleAddRestaurant = (newRestaurant) => {
+    try {
+      const custom = JSON.parse(localStorage.getItem('foodbite_custom_restaurants') || '[]')
+      localStorage.setItem('foodbite_custom_restaurants', JSON.stringify([newRestaurant, ...custom]))
+      setStats((prev) => ({
+        ...prev,
+        totalRestaurants: prev.totalRestaurants + 1
+      }))
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   const handleViewOrder = (order) => {
     setSelectedOrder(order)
-    setIsModalOpen(true)
+    setIsOrderModalOpen(true)
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-      {/* Top Realtime Live Dispatch Ticker */}
-      <RealtimeTicker />
-
       <div className="flex-1 flex">
         {/* Sidebar Navigation */}
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Main Content Area (Offset for lg screen sidebar) */}
+        {/* Main Content Area */}
         <div className="flex-1 lg:pl-64 flex flex-col w-full">
           {/* Top Bar */}
           <header className="bg-slate-950/80 border-b border-slate-800/80 sticky top-0 z-30 px-4 sm:px-8 py-3.5 flex items-center justify-between backdrop-blur-xl">
@@ -129,26 +166,41 @@ export default function DashboardPage() {
 
               <div>
                 <h1 className="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
-                  <span>Dashboard Overview</span>
-                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <Radio className="w-2.5 h-2.5 animate-pulse" /> Live Gateway
+                  <span>{isAdmin ? 'Admin Operations Dashboard' : 'Customer Food Hub'}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+                    isAdmin
+                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  }`}>
+                    {isAdmin ? 'Administrator' : 'Customer'}
                   </span>
                 </h1>
                 <p className="text-xs text-slate-400 hidden sm:block">
-                  Real-time analytics, restaurant operations & dispatch performance
+                  {isAdmin
+                    ? 'Platform analytics, restaurant management & live order fulfillment'
+                    : 'Track active deliveries, reorder your favorite meals, and discover dining'}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Simulate order quick trigger */}
-              <button
-                onClick={handleSimulateOrder}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-95 text-white transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5"
-              >
-                <Bell className="w-3.5 h-3.5 animate-bounce" />
-                <span className="hidden sm:inline">Simulate Order</span>
-              </button>
+              {isAdmin ? (
+                <button
+                  onClick={() => setIsAddRestaurantModalOpen(true)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-95 text-white transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Add Restaurant</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('/restaurants')}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-95 text-white transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Order Now</span>
+                </button>
+              )}
 
               {/* User badge */}
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs">
@@ -160,7 +212,7 @@ export default function DashboardPage() {
                   )}
                 </div>
                 <span className="font-semibold text-slate-200 hidden md:inline">
-                  {currentUser?.name || 'Alex Johnson'}
+                  {currentUser?.name}
                 </span>
               </div>
             </div>
@@ -168,28 +220,33 @@ export default function DashboardPage() {
 
           {/* Main Dashboard Body */}
           <main className="p-4 sm:p-6 lg:p-8 space-y-8 flex-1 max-w-7xl w-full mx-auto">
-            
-            {/* Realtime Live Welcome Banner */}
+            {/* Welcome Banner */}
             <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-orange-950/40 border border-slate-800/80 shadow-2xl relative overflow-hidden backdrop-blur-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold mb-3">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Module 2: Food Delivery Dashboard Active</span>
-                  </div>
                   <h2 className="text-xl sm:text-3xl font-black text-white tracking-tight mb-2">
-                    Welcome back, {currentUser?.name || 'Portal Member'}!
+                    Welcome back, {currentUser?.name}!
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-                    Here is what is happening across your food delivery ecosystem today. 
-                    Monitor restaurant metrics, menu counts, active deliveries, and revenue in real-time.
+                    {isAdmin
+                      ? 'You are managing the platform in Admin Mode. Add new restaurants, monitor sales, and oversee live order dispatching.'
+                      : 'You are signed in as Customer. Browse top-rated partnered restaurants, select items, and place fast delivery orders.'}
                   </p>
                 </div>
 
                 <div className="shrink-0 flex items-center gap-2 sm:self-center">
+                  {!isAdmin && (
+                    <Link
+                      to="/restaurants"
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white transition-all flex items-center gap-2 active:scale-95 shadow-md shadow-orange-500/20"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      <span>Explore Restaurants</span>
+                    </Link>
+                  )}
                   <button
                     onClick={handleRefreshData}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-2 active:scale-95"
                   >
                     <RotateCw className={`w-3.5 h-3.5 text-orange-400 ${isLoading ? 'animate-spin' : ''}`} />
                     <span>Sync Live Data</span>
@@ -198,74 +255,106 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* 7 Required Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* 1. Total Restaurants */}
-              <StatCard
-                title="Total Restaurants"
-                value={stats.totalRestaurants}
-                change={stats.restaurantsChange}
-                icon={Store}
-                colorScheme="orange"
-              />
-
-              {/* 2. Total Food Items */}
-              <StatCard
-                title="Total Food Items"
-                value={stats.totalFoodItems}
-                change={stats.foodItemsChange}
-                icon={MenuSquare}
-                colorScheme="amber"
-              />
-
-              {/* 3. Total Orders */}
-              <StatCard
-                title="Total Orders"
-                value={stats.totalOrders.toLocaleString()}
-                change={stats.ordersChange}
-                icon={ShoppingBag}
-                colorScheme="purple"
-              />
-
-              {/* 4. Active Orders */}
-              <StatCard
-                title="Active Orders"
-                value={stats.activeOrders}
-                change={stats.activeChange}
-                icon={Activity}
-                colorScheme="blue"
-                pulse={true}
-              />
-
-              {/* 5. Delivered Orders */}
-              <StatCard
-                title="Delivered Orders"
-                value={stats.deliveredOrders.toLocaleString()}
-                change={stats.deliveredRate}
-                icon={CheckCircle2}
-                colorScheme="emerald"
-              />
-
-              {/* 6. Total Customers */}
-              <StatCard
-                title="Total Customers"
-                value={stats.totalCustomers.toLocaleString()}
-                change={stats.customersChange}
-                icon={Users}
-                colorScheme="cyan"
-              />
-
-              {/* 7. Revenue Summary */}
-              <div className="sm:col-span-2">
+            {/* Metrics Section based on Role */}
+            {isAdmin ? (
+              /* Admin: 7 Core Platform Metrics */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
-                  title="Revenue Summary (Month to Date)"
-                  value={`$${stats.revenueSummary.totalRevenue.toLocaleString()}`}
-                  change={`${stats.revenueSummary.growthRate} net growth`}
-                  icon={DollarSign}
+                  title="Total Restaurants"
+                  value={stats.totalRestaurants}
+                  change={stats.restaurantsChange}
+                  icon={Store}
+                  colorScheme="orange"
+                />
+
+                <StatCard
+                  title="Total Food Items"
+                  value={stats.totalFoodItems}
+                  change={stats.foodItemsChange}
+                  icon={MenuSquare}
+                  colorScheme="amber"
+                />
+
+                <StatCard
+                  title="Total Orders"
+                  value={stats.totalOrders.toLocaleString()}
+                  change={stats.ordersChange}
+                  icon={ShoppingBag}
+                  colorScheme="purple"
+                />
+
+                <StatCard
+                  title="Active Orders"
+                  value={stats.activeOrders}
+                  change={stats.activeChange}
+                  icon={Activity}
+                  colorScheme="blue"
+                  pulse={true}
+                />
+
+                <StatCard
+                  title="Delivered Orders"
+                  value={stats.deliveredOrders.toLocaleString()}
+                  change={stats.deliveredRate}
+                  icon={CheckCircle2}
                   colorScheme="emerald"
                 />
+
+                <StatCard
+                  title="Total Customers"
+                  value={stats.totalCustomers.toLocaleString()}
+                  change={stats.customersChange}
+                  icon={Users}
+                  colorScheme="cyan"
+                />
+
+                <div className="sm:col-span-2">
+                  <StatCard
+                    title="Revenue Summary (Month to Date)"
+                    value={`$${stats.revenueSummary.totalRevenue.toLocaleString()}`}
+                    change={`${stats.revenueSummary.growthRate} net growth`}
+                    icon={DollarSign}
+                    colorScheme="emerald"
+                  />
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Customer: Tailored Food Hub Metrics */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                  title="My Active Orders"
+                  value="1"
+                  change="In kitchen preparation"
+                  icon={Activity}
+                  colorScheme="orange"
+                  pulse={true}
+                />
+
+                <StatCard
+                  title="My Past Orders"
+                  value="8"
+                  change="All completed on time"
+                  icon={CheckCircle2}
+                  colorScheme="emerald"
+                />
+
+                <StatCard
+                  title="FoodBite Rewards"
+                  value="350 pts"
+                  change="Free dessert unlock soon"
+                  icon={Gift}
+                  colorScheme="amber"
+                />
+
+                <StatCard
+                  title="Favorite Kitchens"
+                  value="5"
+                  change="Open for delivery now"
+                  icon={Heart}
+                  colorScheme="purple"
+                />
+              </div>
+            )}
 
             {/* Quick Action Cards */}
             <QuickActions 
@@ -274,35 +363,15 @@ export default function DashboardPage() {
               isRefreshing={isLoading}
             />
 
-            {/* Revenue Analytics Chart (Dummy Data) */}
-            <RevenueChart />
+            {/* Admin: Revenue Analytics Chart */}
+            {isAdmin && <RevenueChart />}
 
-            {/* Recent Orders Table (Search, Filter, Sort, Modal) */}
+            {/* Recent Orders Table */}
             <RecentOrdersTable 
               orders={orders}
               isLoading={isLoading}
               onViewOrder={handleViewOrder}
             />
-
-            {/* Roadmap / Module Status Notice */}
-            <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <span className="font-bold text-white text-sm block mb-1">
-                  Module 2 Checklist Complete
-                </span>
-                <p>
-                  Total Restaurants &bull; Total Food Items &bull; Total Orders &bull; Active Orders &bull; Delivered Orders &bull; Customers &bull; Revenue Summary &bull; Recent Orders &bull; Quick Action Cards
-                </p>
-              </div>
-
-              <div className="shrink-0">
-                <span className="px-3 py-1.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold inline-flex items-center gap-1.5">
-                  <span>Ready for Module 3</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </div>
-
           </main>
         </div>
       </div>
@@ -310,8 +379,15 @@ export default function DashboardPage() {
       {/* Order Details Modal */}
       <OrderDetailsModal
         order={selectedOrder}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+      />
+
+      {/* Admin: Add Restaurant Modal */}
+      <AddRestaurantModal
+        isOpen={isAddRestaurantModalOpen}
+        onClose={() => setIsAddRestaurantModalOpen(false)}
+        onAddRestaurant={handleAddRestaurant}
       />
     </div>
   )

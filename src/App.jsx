@@ -7,6 +7,8 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import DashboardPage from './pages/DashboardPage'
+import RestaurantsPage from './pages/RestaurantsPage'
+import UpcomingModulePage from './pages/UpcomingModulePage'
 
 export default function App() {
   return (
@@ -44,6 +46,56 @@ export default function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/restaurants"
+          element={
+            <ProtectedRoute>
+              <RestaurantsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Individual module routes to prevent multi-highlighting and provide clean previews */}
+        <Route
+          path="/menu"
+          element={
+            <ProtectedRoute>
+              <UpcomingModulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <UpcomingModulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UpcomingModulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <UpcomingModulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <UpcomingModulePage />
             </ProtectedRoute>
           }
         />

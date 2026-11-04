@@ -9,12 +9,13 @@ import {
   ShieldCheck, 
   ChevronDown,
   LayoutDashboard,
-  Radio
+  Shield,
+  ShoppingBag
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 export default function Navbar() {
-  const { currentUser, isAuthenticated, requestLogout } = useAuth()
+  const { currentUser, isAuthenticated, isAdmin, requestLogout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
 
@@ -37,12 +38,9 @@ export default function Navbar() {
               <span className="font-extrabold text-white text-lg leading-tight block">
                 FoodBite <span className="text-orange-500">Express</span>
               </span>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                  Live Dispatch
-                </span>
-              </div>
+              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                Management Portal
+              </span>
             </div>
           </Link>
 
@@ -58,11 +56,13 @@ export default function Navbar() {
                   <span>Dashboard</span>
                 </Link>
 
-                {/* Live connection badge */}
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-400">
-                  <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
-                  <span>Realtime Sync</span>
-                </div>
+                <Link
+                  to="/restaurants"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-900 transition-colors flex items-center gap-2 border border-slate-800"
+                >
+                  <ShoppingBag className="w-4 h-4 text-emerald-400" />
+                  <span>Restaurants</span>
+                </Link>
 
                 {/* User Profile Dropdown */}
                 <div className="relative">
@@ -79,30 +79,34 @@ export default function Navbar() {
                     </div>
                     <div className="text-xs">
                       <p className="font-bold text-white leading-tight">
-                        {currentUser?.name || 'Portal User'}
+                        {currentUser?.name}
                       </p>
-                      <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-semibold border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
-                        {currentUser?.role || 'Portal Member'}
+                      <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase border ${
+                        isAdmin
+                          ? 'bg-orange-500/15 text-orange-400 border-orange-500/30'
+                          : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      }`}>
+                        {currentUser?.role || 'Portal User'}
                       </span>
                     </div>
                     <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
                   </button>
 
                   {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-60 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="absolute right-0 mt-2 w-64 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                       <div className="px-4 py-3 border-b border-slate-800">
                         <p className="text-xs font-bold text-white">{currentUser?.name}</p>
                         <p className="text-[11px] text-slate-400 truncate">{currentUser?.email}</p>
+                        <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase ${
+                          isAdmin
+                            ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        }`}>
+                          {isAdmin ? '🛡️ Administrator Access' : '👤 Customer Account'}
+                        </span>
                       </div>
 
-                      <div className="py-2 px-4 space-y-1 text-[11px] text-slate-400">
-                        <div className="flex items-center gap-2">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Protected Session Active</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-1 border-t border-slate-800">
+                      <div className="pt-1">
                         <button
                           onClick={handleSignoutClick}
                           className="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors cursor-pointer"
@@ -161,8 +165,10 @@ export default function Navbar() {
                 <div>
                   <p className="text-xs font-bold text-white">{currentUser?.name}</p>
                   <p className="text-[11px] text-slate-400">{currentUser?.email}</p>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase">{currentUser?.role}</span>
                 </div>
               </div>
+
               <Link
                 to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
@@ -171,11 +177,21 @@ export default function Navbar() {
                 <LayoutDashboard className="w-4 h-4 text-orange-400" />
                 <span>Dashboard</span>
               </Link>
+
+              <Link
+                to="/restaurants"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-200 hover:bg-slate-900 flex items-center gap-2"
+              >
+                <ShoppingBag className="w-4 h-4 text-emerald-400" />
+                <span>Restaurants</span>
+              </Link>
+
               <button
                 onClick={handleSignoutClick}
                 className="w-full text-left py-2.5 px-3 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/10 flex items-center gap-2"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </button>
             </>

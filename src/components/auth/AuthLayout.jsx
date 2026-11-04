@@ -11,14 +11,9 @@ import {
   CheckCircle2,
   TrendingUp
 } from 'lucide-react'
-import RealtimeTicker from '../common/RealtimeTicker'
-
 export default function AuthLayout({ children, title, subtitle }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-      {/* Realtime Live Dispatch Ticker at the Top */}
-      <RealtimeTicker />
-
       {/* Main Container */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
