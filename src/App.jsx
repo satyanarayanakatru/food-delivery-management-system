@@ -8,6 +8,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import DashboardPage from './pages/DashboardPage'
 import RestaurantsPage from './pages/RestaurantsPage'
+import MenuPage from './pages/MenuPage'
 import UpcomingModulePage from './pages/UpcomingModulePage'
 
 export default function App() {
@@ -63,7 +64,7 @@ export default function App() {
           path="/menu"
           element={
             <ProtectedRoute>
-              <UpcomingModulePage />
+              <MenuPage />
             </ProtectedRoute>
           }
         />

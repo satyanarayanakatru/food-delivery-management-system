@@ -10,7 +10,8 @@ import {
   ChevronDown,
   LayoutDashboard,
   Shield,
-  ShoppingBag
+  ShoppingBag,
+  MenuSquare
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
@@ -62,6 +63,14 @@ export default function Navbar() {
                 >
                   <ShoppingBag className="w-4 h-4 text-emerald-400" />
                   <span>Restaurants</span>
+                </Link>
+
+                <Link
+                  to="/menu"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-900 transition-colors flex items-center gap-2 border border-slate-800"
+                >
+                  <MenuSquare className="w-4 h-4 text-amber-400" />
+                  <span>Menu</span>
                 </Link>
 
                 {/* User Profile Dropdown */}
@@ -185,6 +194,15 @@ export default function Navbar() {
               >
                 <ShoppingBag className="w-4 h-4 text-emerald-400" />
                 <span>Restaurants</span>
+              </Link>
+
+              <Link
+                to="/menu"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-200 hover:bg-slate-900 flex items-center gap-2"
+              >
+                <MenuSquare className="w-4 h-4 text-amber-400" />
+                <span>Menu Catalog</span>
               </Link>
 
               <button
