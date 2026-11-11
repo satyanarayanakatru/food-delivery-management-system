@@ -79,7 +79,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </span>
             {navItems.map((item, idx) => {
               const Icon = item.icon
-              const isSelected = location.pathname === item.path
+              const isSelected = location.pathname === item.path || (item.path === '/orders' && location.pathname === '/checkout')
               const showBadge = item.path === '/orders' && isCustomer && cartCount > 0
               return (
                 <Link

@@ -11,6 +11,7 @@ import DashboardPage from './pages/DashboardPage'
 import RestaurantsPage from './pages/RestaurantsPage'
 import MenuPage from './pages/MenuPage'
 import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
 import UpcomingModulePage from './pages/UpcomingModulePage'
 
 export default function App() {
@@ -76,6 +77,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
             </ProtectedRoute>
           }
         />

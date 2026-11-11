@@ -60,59 +60,13 @@ export default function CartPage() {
   const amountNeededForFreeDelivery = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal)
   const freeDeliveryProgress = Math.min(100, (subtotal / FREE_DELIVERY_THRESHOLD) * 100)
 
-  // Customer: Place Order from Cart
+  // Customer: Navigate to Checkout (Module 6)
   const handleCheckoutFromCart = () => {
     if (cartItems.length === 0) {
-      toast.warning('Your cart is empty! Add items before placing an order.', { icon: '⚠️' })
+      toast.warning('Your cart is empty! Add items before checkout.', { icon: '⚠️' })
       return
     }
-
-    const orderId = `FD-${Math.floor(1000 + Math.random() * 9000)}`
-    const restaurantNames = Array.from(new Set(cartItems.map((i) => i.restaurantName)))
-    const restaurantLabel =
-      restaurantNames.length === 1
-        ? restaurantNames[0]
-        : `${restaurantNames[0]} (+${restaurantNames.length - 1} more)`
-
-    const newOrder = {
-      id: orderId,
-      customer: {
-        name: currentUser?.name || 'Sarah Connor',
-        email: currentUser?.email || 'customer@foodbite.com',
-        avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-        phone: currentUser?.phone || '+1 (555) 234-5678',
-        address: currentUser?.address || '742 Evergreen Terrace, Springfield'
-      },
-      restaurant: restaurantLabel,
-      items: cartItems.map((item) => ({
-        name: item.name,
-        qty: item.quantity,
-        price: item.price
-      })),
-      totalAmount: totalPrice,
-      paymentMethod: 'Credit Card / Wallet',
-      paymentStatus: 'Paid',
-      orderStatus: 'Preparing',
-      placedAt: 'Just now',
-      estimatedDelivery: '25-35 mins',
-      rider: 'Marcus Vance'
-    }
-
-    // Save to localStorage
-    try {
-      const existing = JSON.parse(localStorage.getItem('foodbite_recent_orders') || '[]')
-      localStorage.setItem('foodbite_recent_orders', JSON.stringify([newOrder, ...existing]))
-    } catch (e) {
-      console.error(e)
-    }
-
-    clearCartDirect()
-    setLastPlacedOrder(newOrder)
-
-    toast.success(
-      `Order ${orderId} confirmed! Total: $${totalPrice.toFixed(2)}. Kitchen is preparing your food!`,
-      { icon: '🎉' }
-    )
+    navigate('/checkout')
   }
 
   return (
@@ -448,7 +402,7 @@ export default function CartPage() {
                         className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-sm font-black transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                       >
                         <ShoppingBag className="w-4 h-4" />
-                        <span>Confirm & Place Order</span>
+                        <span>Proceed to Checkout</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
 
