@@ -13,10 +13,12 @@ import {
   X
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useCart } from '../../context/CartContext'
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
-  const { currentUser, requestLogout } = useAuth()
+  const { currentUser, isCustomer, requestLogout } = useAuth()
+  const { cartCount } = useCart()
 
   // Distinct routes for each sidebar option to prevent multi-highlighting
   const navItems = [
@@ -78,19 +80,33 @@ export default function Sidebar({ isOpen, onClose }) {
             {navItems.map((item, idx) => {
               const Icon = item.icon
               const isSelected = location.pathname === item.path
+              const showBadge = item.path === '/orders' && isCustomer && cartCount > 0
               return (
                 <Link
                   key={idx}
                   to={item.path}
                   onClick={() => onClose && onClose()}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     isSelected
                       ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20'
                       : 'text-slate-400 hover:text-white hover:bg-slate-900'
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span>{item.name}</span>
+                  </div>
+                  {showBadge && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                        isSelected
+                          ? 'bg-white text-orange-600'
+                          : 'bg-orange-500 text-white'
+                      }`}
+                    >
+                      {cartCount}
+                    </span>
+                  )}
                 </Link>
               )
             })}

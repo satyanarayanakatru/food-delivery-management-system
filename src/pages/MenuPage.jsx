@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { 
   MenuSquare, 
   Menu, 
@@ -14,10 +15,12 @@ import {
   Trash2,
   Leaf,
   Beef,
-  ShoppingBag
+  ShoppingBag,
+  ShoppingCart
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
+import { useCart } from '../context/CartContext'
 import Sidebar from '../components/layout/Sidebar'
 import FoodCard from '../components/menu/FoodCard'
 import FoodFilters from '../components/menu/FoodFilters'
@@ -29,6 +32,7 @@ import { fetchMenuItems } from '../services/menuService'
 
 export default function MenuPage() {
   const { currentUser, isAdmin } = useAuth()
+  const { cartCount } = useCart()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [foodItems, setFoodItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -292,7 +296,7 @@ export default function MenuPage() {
 
             <div className="flex items-center gap-3">
               {/* Admin: Add Food Item Action */}
-              {isAdmin && (
+              {isAdmin ? (
                 <button
                   type="button"
                   onClick={handleOpenAdd}
@@ -301,6 +305,19 @@ export default function MenuPage() {
                   <PlusCircle className="w-4 h-4" />
                   <span>Add Food Item</span>
                 </button>
+              ) : (
+                <Link
+                  to="/orders"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-95 text-white transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>View Cart</span>
+                  {cartCount > 0 && (
+                    <span className="px-1.5 py-0.2 bg-white text-orange-600 rounded-full text-[10px] font-black">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
               )}
 
               {/* Refresh Sync */}

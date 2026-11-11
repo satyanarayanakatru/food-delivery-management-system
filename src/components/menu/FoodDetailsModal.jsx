@@ -5,7 +5,8 @@ import {
   Clock, 
   Flame, 
   Store, 
-  ShoppingBag, 
+  ShoppingBag,
+  ShoppingCart,
   Plus, 
   Minus, 
   CheckCircle2, 
@@ -19,6 +20,7 @@ import {
   Sliders
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useCart } from '../../context/CartContext'
 import { toast } from 'react-toastify'
 
 export default function FoodDetailsModal({
@@ -31,6 +33,7 @@ export default function FoodDetailsModal({
   onDeleteFood
 }) {
   const { currentUser, isAdmin } = useAuth()
+  const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [specialInstructions, setSpecialInstructions] = useState('')
 
@@ -403,29 +406,48 @@ export default function FoodDetailsModal({
               </div>
             </>
           ) : (
-            /* Customer Actions: Close & Place Order */
+            /* Customer Actions: Close, Add to Cart & Quick Order */
             <>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"
               >
                 Close
               </button>
 
-              <button
-                type="button"
-                onClick={handlePlaceOrder}
-                disabled={!isAvailable}
-                className={`px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer ${
-                  isAvailable
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-orange-500/25'
-                    : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
-                }`}
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span>{isAvailable ? `Place Order ($${orderTotal.toFixed(2)})` : 'Currently Unavailable'}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addToCart(food, quantity)
+                    onClose()
+                  }}
+                  disabled={!isAvailable}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all active:scale-95 cursor-pointer ${
+                    isAvailable
+                      ? 'bg-slate-900 hover:bg-slate-800 text-orange-400 border-orange-500/40'
+                      : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
+                  }`}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Add to Cart</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePlaceOrder}
+                  disabled={!isAvailable}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-lg active:scale-95 cursor-pointer ${
+                    isAvailable
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-orange-500/25'
+                      : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                  }`}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{isAvailable ? `Quick Order ($${orderTotal.toFixed(2)})` : 'Unavailable'}</span>
+                </button>
+              </div>
             </>
           )}
         </div>

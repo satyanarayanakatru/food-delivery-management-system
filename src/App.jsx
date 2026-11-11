@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { CartProvider } from './context/CartContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
 import LoginPage from './pages/auth/LoginPage'
@@ -9,12 +10,14 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import DashboardPage from './pages/DashboardPage'
 import RestaurantsPage from './pages/RestaurantsPage'
 import MenuPage from './pages/MenuPage'
+import CartPage from './pages/CartPage'
 import UpcomingModulePage from './pages/UpcomingModulePage'
 
 export default function App() {
   return (
     <AuthProvider>
-      <Routes>
+      <CartProvider>
+        <Routes>
         {/* Public / Auth routes guarded so logged-in users are forwarded to dashboard */}
         <Route
           path="/login"
@@ -72,7 +75,7 @@ export default function App() {
           path="/orders"
           element={
             <ProtectedRoute>
-              <UpcomingModulePage />
+              <CartPage />
             </ProtectedRoute>
           }
         />
@@ -104,7 +107,8 @@ export default function App() {
         {/* Default / Fallback Routes */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
+        </Routes>
+      </CartProvider>
     </AuthProvider>
   )
 }

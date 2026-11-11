@@ -6,7 +6,8 @@ import {
   Edit3, 
   Trash2, 
   Power, 
-  ShoppingBag, 
+  ShoppingBag,
+  ShoppingCart,
   Plus, 
   Minus, 
   Check, 
@@ -15,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useCart } from '../../context/CartContext'
 import { toast } from 'react-toastify'
 
 export default function FoodCard({
@@ -26,6 +28,7 @@ export default function FoodCard({
   onQuickOrder
 }) {
   const { isAdmin } = useAuth()
+  const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1)
 
   const {
@@ -56,15 +59,14 @@ export default function FoodCard({
     setQuantity((prev) => Math.max(1, prev - 1))
   }
 
-  const handleOrderClick = (e) => {
+  const handleAddToCartClick = (e) => {
     e.stopPropagation()
     if (!isAvailable) {
       toast.warning('This item is currently sold out and unavailable.', { icon: '⚠️' })
       return
     }
-    if (onQuickOrder) {
-      onQuickOrder(food, quantity)
-    }
+    addToCart(food, quantity)
+    setQuantity(1)
   }
 
   return (
@@ -252,19 +254,19 @@ export default function FoodCard({
               </button>
             </div>
 
-            {/* Order Action Button */}
+            {/* Add to Cart Action Button */}
             <button
               type="button"
-              onClick={handleOrderClick}
+              onClick={handleAddToCartClick}
               disabled={!isAvailable}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
                 isAvailable
                   ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
                   : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
               }`}
             >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>{isAvailable ? 'Order' : 'Unavailable'}</span>
+              <ShoppingCart className="w-3.5 h-3.5" />
+              <span>{isAvailable ? 'Add to Cart' : 'Unavailable'}</span>
             </button>
           </div>
         )}

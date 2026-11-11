@@ -11,15 +11,18 @@ import {
   UtensilsCrossed,
   ShieldCheck,
   ShoppingBag,
+  ShoppingCart,
   Plus,
   Minus,
   Check
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../context/AuthContext'
+import { useCart } from '../../context/CartContext'
 
 export default function RestaurantDetailsModal({ restaurant, isOpen, onClose, onOrderPlaced }) {
   const { currentUser, isAdmin } = useAuth()
+  const { addToCart } = useCart()
   const [selectedQuantities, setSelectedQuantities] = useState({})
 
   if (!isOpen || !restaurant) return null
@@ -47,6 +50,30 @@ export default function RestaurantDetailsModal({ restaurant, isOpen, onClose, on
   const itemsTotal = itemsInOrder.reduce((acc, it) => acc + it.price * it.qty, 0)
   const deliveryFee = restaurant.deliveryCharges || 0
   const finalTotal = itemsTotal > 0 ? itemsTotal + deliveryFee : 0
+
+  const handleAddSelectedToCart = () => {
+    if (itemsInOrder.length === 0) {
+      toast.info('Please select at least one dish quantity using the + buttons!', {
+        icon: '🍕'
+      })
+      return
+    }
+    itemsInOrder.forEach((dish) => {
+      addToCart(
+        {
+          id: `rest-${restaurant.id}-${dish.name.replace(/\s+/g, '-').toLowerCase()}`,
+          name: dish.name,
+          price: dish.price,
+          image: dish.image || restaurant.image,
+          category: restaurant.cuisine,
+          restaurantName: restaurant.name,
+          isVeg: false
+        },
+        dish.qty
+      )
+    })
+    onClose()
+  }
 
   const handlePlaceCustomerOrder = () => {
     if (itemsInOrder.length === 0) {
@@ -318,13 +345,24 @@ export default function RestaurantDetailsModal({ restaurant, isOpen, onClose, on
             </button>
 
             {!isAdmin && restaurant.isOpen && (
-              <button
-                onClick={handlePlaceCustomerOrder}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-95 text-white transition-all shadow-lg shadow-orange-500/25 flex items-center gap-2"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Place Order {finalTotal > 0 ? `($${finalTotal.toFixed(2)})` : ''}</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleAddSelectedToCart}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-orange-400 border border-orange-500/40 active:scale-95 transition-all flex items-center gap-1.5"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Add to Cart</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePlaceCustomerOrder}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-95 text-white transition-all shadow-lg shadow-orange-500/25 flex items-center gap-2"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>Place Order {finalTotal > 0 ? `($${finalTotal.toFixed(2)})` : ''}</span>
+                </button>
+              </>
             )}
           </div>
         </div>
