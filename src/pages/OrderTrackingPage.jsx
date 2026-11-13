@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
+import { useAppData } from '../context/AppDataContext'
 import Sidebar from '../components/layout/Sidebar'
 import { INITIAL_RECENT_ORDERS } from '../data/mockDashboardData'
 
@@ -39,8 +40,7 @@ function normalizeOrder(o) {
       name: o.customer?.name || 'Customer',
       email: o.customer?.email || '',
       phone: o.customer?.phone || '+1 (555) 000-0000',
-      avatar: o.customer?.avatar ||
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'
+      avatar: o.customer?.avatar || '/satyanarayana.jpg'
     }
   }
 }
@@ -298,18 +298,7 @@ export default function OrderTrackingPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [liveStatus, setLiveStatus] = useState(null) // simulated live updates
 
-  // Load all orders (localStorage + mock)
-  const allOrders = useMemo(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('foodbite_recent_orders') || '[]')
-      const mock = INITIAL_RECENT_ORDERS
-      // merge: saved first, then mock ones not already in saved
-      const savedIds = new Set(saved.map(o => o.id))
-      return [...saved, ...mock.filter(o => !savedIds.has(o.id))].map(normalizeOrder)
-    } catch {
-      return INITIAL_RECENT_ORDERS.map(normalizeOrder)
-    }
-  }, [])
+  const { orders: allOrders, updateOrderStatus } = useAppData()
 
   const order = useMemo(() => {
     if (!searchId.trim()) return null
@@ -337,6 +326,7 @@ export default function OrderTrackingPage() {
     // Auto-advance Preparing → Out for Delivery after 15s (demo feel)
     if (status === 'Preparing') {
       const t = setTimeout(() => {
+        updateOrderStatus(displayOrder.id, 'Out for Delivery')
         setLiveStatus('Out for Delivery')
         toast.info('🛵 Your rider has picked up the order!', { autoClose: 4000 })
       }, 15000)

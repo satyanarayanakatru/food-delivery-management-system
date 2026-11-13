@@ -19,6 +19,7 @@ import {
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useAppData } from '../context/AppDataContext'
 import Sidebar from '../components/layout/Sidebar'
 import RecentOrdersTable from '../components/dashboard/RecentOrdersTable'
 import OrderDetailsModal from '../components/dashboard/OrderDetailsModal'
@@ -43,15 +44,8 @@ export default function CartPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [lastPlacedOrder, setLastPlacedOrder] = useState(null)
 
-  // Admin: Platform orders monitoring state
-  const [adminOrders, setAdminOrders] = useState(() => {
-    try {
-      const saved = localStorage.getItem('foodbite_recent_orders')
-      return saved ? JSON.parse(saved) : INITIAL_RECENT_ORDERS
-    } catch (e) {
-      return INITIAL_RECENT_ORDERS
-    }
-  })
+  // Platform orders monitoring state (connected to dynamic AppDataContext)
+  const { orders: adminOrders } = useAppData()
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
 

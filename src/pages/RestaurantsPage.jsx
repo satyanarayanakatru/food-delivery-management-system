@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
+import { useAppData } from '../context/AppDataContext'
 import Sidebar from '../components/layout/Sidebar'
 import RestaurantCard from '../components/restaurants/RestaurantCard'
 import RestaurantDetailsModal from '../components/restaurants/RestaurantDetailsModal'
@@ -92,18 +93,12 @@ export default function RestaurantsPage() {
     loadData(false)
   }, [])
 
+  const { addRestaurant: appAddRestaurant, deleteRestaurant: appDeleteRestaurant, addOrder: appAddOrder } = useAppData()
+
   // Admin: Add New Restaurant
   const handleAddRestaurant = (newRestaurant) => {
-    setRestaurants((prev) => {
-      const updated = [newRestaurant, ...prev]
-      try {
-        const custom = JSON.parse(localStorage.getItem('foodbite_custom_restaurants') || '[]')
-        localStorage.setItem('foodbite_custom_restaurants', JSON.stringify([newRestaurant, ...custom]))
-      } catch (e) {
-        console.error(e)
-      }
-      return updated
-    })
+    appAddRestaurant(newRestaurant)
+    setRestaurants((prev) => [newRestaurant, ...prev])
   }
 
   // Admin: Request Delete Restaurant (opens ConfirmModal)
@@ -115,18 +110,8 @@ export default function RestaurantsPage() {
   const handleConfirmDelete = () => {
     if (!restaurantToDelete) return
     const { id, name } = restaurantToDelete
-
-    setRestaurants((prev) => {
-      const updated = prev.filter((r) => r.id !== id)
-      try {
-        const custom = JSON.parse(localStorage.getItem('foodbite_custom_restaurants') || '[]')
-        const filteredCustom = custom.filter((r) => r.id !== id)
-        localStorage.setItem('foodbite_custom_restaurants', JSON.stringify(filteredCustom))
-      } catch (e) {
-        console.error(e)
-      }
-      return updated
-    })
+    appDeleteRestaurant(id)
+    setRestaurants((prev) => prev.filter((r) => r.id !== id))
     toast.success(`Restaurant "${name}" has been permanently deleted.`, { icon: '🗑️' })
     setRestaurantToDelete(null)
   }
@@ -147,13 +132,7 @@ export default function RestaurantsPage() {
 
   // Customer: Handle Order Placed
   const handleOrderPlaced = (newOrder) => {
-    // Optionally update stats in localStorage
-    try {
-      const savedOrders = JSON.parse(localStorage.getItem('foodbite_recent_orders') || '[]')
-      localStorage.setItem('foodbite_recent_orders', JSON.stringify([newOrder, ...savedOrders]))
-    } catch (e) {
-      console.error(e)
-    }
+    appAddOrder(newOrder)
   }
 
   // Filtered & Sorted List

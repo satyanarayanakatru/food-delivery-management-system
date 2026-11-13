@@ -19,12 +19,12 @@ export const INITIAL_DEMO_USERS = [
   },
   {
     id: 'user-customer-01',
-    name: 'Sarah Connor',
-    email: 'customer@foodbite.com',
+    name: 'Katru Satyanarayana',
+    email: 'satyanarayanayadav50@gmail.com',
     password: 'Password123!',
-    phone: '+1 (555) 234-5678',
-    address: '742 Evergreen Terrace, Springfield',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
+    phone: '+91 8179795623',
+    address: 'Plot No. 42, Sri Sai Nagar, Madhapur, Hyderabad',
+    avatar: '/satyanarayana.jpg',
     role: 'customer',
     createdAt: new Date().toISOString()
   }
@@ -38,7 +38,24 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('foodbite_user')
-      return savedUser ? JSON.parse(savedUser) : null
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser)
+        // If it's a customer session or the demo customer, update to Katru Satyanarayana
+        if (parsed.role === 'customer' || parsed.id === 'user-customer-01' || parsed.email === 'customer@foodbite.com') {
+          const updated = {
+            ...parsed,
+            id: 'user-customer-01',
+            name: 'Katru Satyanarayana',
+            email: 'satyanarayanayadav50@gmail.com',
+            phone: '+91 8179795623',
+            avatar: '/satyanarayana.jpg'
+          }
+          localStorage.setItem('foodbite_user', JSON.stringify(updated))
+          return updated
+        }
+        return parsed
+      }
+      return null
     } catch (e) {
       console.error('Error loading current user from localStorage:', e)
       return null
@@ -53,7 +70,7 @@ export const AuthProvider = ({ children }) => {
         const parsed = JSON.parse(storedUsers)
         // Ensure initial demo users are present
         const hasAdmin = parsed.some((u) => u.email.toLowerCase() === 'admin@foodbite.com')
-        const hasCustomer = parsed.some((u) => u.email.toLowerCase() === 'customer@foodbite.com')
+        const hasCustomer = parsed.some((u) => u.email.toLowerCase() === 'satyanarayanayadav50@gmail.com')
         if (hasAdmin && hasCustomer) {
           return parsed
         }
@@ -124,7 +141,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     // 2. Instant match for demo Customer
-    if (trimmedEmail === 'customer@foodbite.com' || trimmedEmail === 'customer') {
+    if (
+      trimmedEmail === 'satyanarayanayadav50@gmail.com' ||
+      trimmedEmail === 'customer@foodbite.com' ||
+      trimmedEmail === 'customer'
+    ) {
       if (
         !trimmedPassword ||
         trimmedPassword.toLowerCase() === 'password123!' ||

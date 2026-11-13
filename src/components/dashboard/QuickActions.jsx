@@ -3,27 +3,28 @@ import { useNavigate } from 'react-router-dom'
 import { 
   Store, 
   MenuSquare, 
-  PlusCircle, 
+  CheckCircle2, 
   BellRing, 
   Download, 
   RotateCw, 
   Sparkles, 
-  ArrowRight
+  ArrowRight,
+  ShoppingBag
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 
-export default function QuickActions({ onSimulateOrder, onRefreshData, isRefreshing }) {
+export default function QuickActions({ 
+  onSimulateOrder, 
+  onAdvanceOrder, 
+  onRefreshData, 
+  isRefreshing,
+  stats
+}) {
   const navigate = useNavigate()
 
   const handleExportData = () => {
-    toast.success('Financial Revenue Summary (CSV/PDF) generated successfully!', {
+    toast.success('Live Revenue & Order Summary report exported successfully!', {
       icon: '📊'
-    })
-  }
-
-  const handleNavigateModule = (moduleName) => {
-    toast.info(`${moduleName} will be activated in the next step!`, {
-      icon: '🚀'
     })
   }
 
@@ -31,34 +32,34 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
     {
       id: 1,
       title: 'Explore Restaurants',
-      desc: 'Browse partner restaurants, cuisines & ratings',
+      desc: `${stats?.totalRestaurants || 20} partner kitchens available now`,
       icon: Store,
       color: 'from-orange-500 to-amber-500',
       action: () => navigate('/restaurants')
     },
     {
       id: 2,
-      title: 'Manage Food Catalog',
-      desc: '284 Curated dishes, categories & dietary filters',
+      title: 'Order Food Catalog',
+      desc: `${stats?.totalFoodItems || 30} dishes with veg/non-veg filter`,
       icon: MenuSquare,
       color: 'from-emerald-500 to-teal-500',
       action: () => navigate('/menu')
     },
     {
       id: 3,
-      title: 'Simulate Customer Order',
-      desc: 'Simulate an incoming customer order alert',
+      title: 'Simulate New Order',
+      desc: 'Inject real-time order & increment revenue',
       icon: BellRing,
       color: 'from-blue-500 to-cyan-500',
       action: onSimulateOrder
     },
     {
       id: 4,
-      title: 'Export Financial Report',
-      desc: 'Download CSV / PDF summary of revenue & orders',
-      icon: Download,
-      color: 'from-purple-500 to-pink-500',
-      action: handleExportData
+      title: 'Mark Order Delivered',
+      desc: `${stats?.activeOrders || 0} active orders ready to complete`,
+      icon: CheckCircle2,
+      color: 'from-emerald-600 to-green-500',
+      action: onAdvanceOrder
     }
   ]
 
@@ -71,7 +72,7 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
             Quick Action Cards
           </h3>
           <p className="text-xs text-slate-400">
-            Instant operations, platform triggers & quick shortcuts
+            Instant operations, real-time triggers & navigation shortcuts
           </p>
         </div>
 
@@ -98,17 +99,17 @@ export default function QuickActions({ onSimulateOrder, onRefreshData, isRefresh
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${act.color} text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-105 transition-transform`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <h4 className="font-bold text-sm text-white group-hover:text-orange-400 transition-colors">
+                <h4 className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors mb-1">
                   {act.title}
                 </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed mb-3">
                   {act.desc}
                 </p>
               </div>
 
-              <div className="mt-4 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-semibold text-orange-400 group-hover:text-orange-300">
-                <span>Launch action</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="flex items-center gap-1 text-[11px] font-bold text-slate-300 group-hover:text-orange-400 transition-colors pt-2 border-t border-slate-800/60">
+                <span>Trigger</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
           )

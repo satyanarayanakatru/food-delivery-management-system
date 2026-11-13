@@ -21,9 +21,24 @@ export default function RecentOrdersTable({ orders, isLoading, onViewOrder }) {
 
   const statusOptions = ['All', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled']
 
+  // Normalize order to handle both schema formats (mock data & checkout-generated)
+  const normalizeOrder = (o) => ({
+    ...o,
+    orderStatus: o.orderStatus || o.status || 'Preparing',
+    totalAmount: o.totalAmount ?? o.total ?? 0,
+    estimatedDelivery: o.estimatedDelivery || o.eta || 'N/A',
+    customer: {
+      name: o.customer?.name || 'Customer',
+      email: o.customer?.email || '',
+      phone: o.customer?.phone || '',
+      avatar: o.customer?.avatar || '/satyanarayana.jpg',
+    }
+  })
+
   // Filter and sort logic
   const filteredOrders = useMemo(() => {
     return orders
+      .map(normalizeOrder)
       .filter((o) => {
         const matchesStatus = statusFilter === 'All' || o.orderStatus === statusFilter
         const query = searchTerm.toLowerCase().trim()
@@ -167,6 +182,7 @@ export default function RecentOrdersTable({ orders, isLoading, onViewOrder }) {
                           src={order.customer.avatar}
                           alt={order.customer.name}
                           className="w-7 h-7 rounded-full object-cover border border-slate-700"
+                          onError={(e) => { e.target.style.display = 'none' }}
                         />
                         <div>
                           <p className="font-bold text-white text-xs">{order.customer.name}</p>

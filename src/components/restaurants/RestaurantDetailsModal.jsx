@@ -87,11 +87,11 @@ export default function RestaurantDetailsModal({ restaurant, isOpen, onClose, on
     const newOrder = {
       id: orderId,
       customer: {
-        name: currentUser?.name || 'Sarah Connor',
-        email: currentUser?.email || 'customer@foodbite.com',
-        avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-        phone: currentUser?.phone || '+1 (555) 234-5678',
-        address: currentUser?.address || '742 Evergreen Terrace, Springfield'
+        name: currentUser?.name || 'Katru Satyanarayana',
+        email: currentUser?.email || 'satyanarayanayadav50@gmail.com',
+        avatar: currentUser?.avatar || '/satyanarayana.jpg',
+        phone: currentUser?.phone || '+91 8179795623',
+        address: currentUser?.address || 'Plot No. 42, Sri Sai Nagar, Madhapur, Hyderabad'
       },
       restaurant: restaurant.name,
       items: itemsInOrder,

@@ -23,15 +23,15 @@ import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/layout/Sidebar'
 
-const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80'
+const DEFAULT_AVATAR = '/satyanarayana.jpg'
 
 const SAMPLE_ADDRESSES = [
-  { id: 1, type: 'home', label: 'Home', line: '742 Evergreen Terrace, Springfield, IL 62701', isDefault: true },
-  { id: 2, type: 'work', label: 'Work', line: '350 Fifth Ave, Suite 1400, New York, NY 10118', isDefault: false }
+  { id: 1, type: 'home', label: 'Home', line: 'Plot No. 42, Sri Sai Nagar, Madhapur, Hyderabad, TS 500081', isDefault: true },
+  { id: 2, type: 'work', label: 'Work', line: 'Cyber Gateway, HITEC City, Hyderabad, TS 500081', isDefault: false }
 ]
 
 export default function ProfilePage() {
-  const { currentUser } = useAuth()
+  const { currentUser, updateUserProfile } = useAuth()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -40,10 +40,10 @@ export default function ProfilePage() {
   const [newAddress, setNewAddress] = useState({ label: '', line: '', type: 'home' })
 
   const [form, setForm] = useState({
-    name: currentUser?.name || 'Sarah Connor',
-    email: currentUser?.email || 'customer@foodbite.com',
-    phone: currentUser?.phone || '+1 (555) 234-5678',
-    bio: 'Food lover & delivery enthusiast. I enjoy trying new cuisines from local restaurants.',
+    name: currentUser?.name || 'Katru Satyanarayana',
+    email: currentUser?.email || 'satyanarayanayadav50@gmail.com',
+    phone: currentUser?.phone || '+91 8179795623',
+    bio: 'Food enthusiast & delivery manager. Passionate about exploring global cuisines.',
     avatar: currentUser?.avatar || DEFAULT_AVATAR
   })
   const [saved, setSaved] = useState({ ...form })
@@ -51,6 +51,7 @@ export default function ProfilePage() {
   const handleSave = () => {
     setSaved({ ...form })
     setEditing(false)
+    updateUserProfile?.(form)
     toast.success('Profile updated successfully!', { icon: '✅' })
   }
 

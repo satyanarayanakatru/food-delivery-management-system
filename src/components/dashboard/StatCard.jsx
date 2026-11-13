@@ -34,6 +34,10 @@ export default function StatCard({
     cyan: {
       bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
       badge: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20'
+    },
+    red: {
+      bg: 'bg-red-500/10 text-red-400 border-red-500/20',
+      badge: 'text-red-400 bg-red-500/10 border-red-500/20'
     }
   }
 

@@ -21,6 +21,7 @@ import {
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useAppData } from '../context/AppDataContext'
 import Sidebar from '../components/layout/Sidebar'
 import FoodCard from '../components/menu/FoodCard'
 import FoodFilters from '../components/menu/FoodFilters'
@@ -33,6 +34,7 @@ import { fetchMenuItems } from '../services/menuService'
 export default function MenuPage() {
   const { currentUser, isAdmin } = useAuth()
   const { cartCount } = useCart()
+  const { refresh: refreshAppData } = useAppData()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [foodItems, setFoodItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -178,6 +180,7 @@ export default function MenuPage() {
     // Save custom modifications to localStorage
     try {
       localStorage.setItem('foodbite_menu_items', JSON.stringify(updatedList))
+      refreshAppData?.()
     } catch (e) {
       console.error(e)
     }
@@ -193,6 +196,7 @@ export default function MenuPage() {
 
     try {
       localStorage.setItem('foodbite_menu_items', JSON.stringify(updatedList))
+      refreshAppData?.()
     } catch (e) {
       console.error(e)
     }
@@ -218,6 +222,7 @@ export default function MenuPage() {
 
     try {
       localStorage.setItem('foodbite_menu_items', JSON.stringify(updatedList))
+      refreshAppData?.()
     } catch (e) {
       console.error(e)
     }

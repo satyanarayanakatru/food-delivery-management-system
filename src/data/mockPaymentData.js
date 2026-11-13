@@ -145,7 +145,7 @@ export const MOCK_TRANSACTIONS = [
   {
     id: 'TXN-001',
     orderId: 'ORD-9842',
-    customer: 'Sarah Connor',
+    customer: 'Katru Satyanarayana',
     amount: 34.50,
     method: 'card',
     status: 'success',

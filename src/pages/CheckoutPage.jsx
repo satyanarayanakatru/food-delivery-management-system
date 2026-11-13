@@ -28,11 +28,13 @@ import {
   ReceiptText,
   PartyPopper,
   Copy,
+  Navigation,
   RotateCcw
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useAppData } from '../context/AppDataContext'
 import Sidebar from '../components/layout/Sidebar'
 import { COUPONS } from '../data/mockPaymentData'
 
@@ -291,11 +293,18 @@ function OrderConfirmScreen({ order, onBack, onNewOrder }) {
           Order Again
         </button>
         <Link
+          to={`/tracking?id=${order.id}`}
+          className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+        >
+          <Navigation className="w-3.5 h-3.5" />
+          Track Order
+        </Link>
+        <Link
           to="/dashboard"
           className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2"
         >
           <UtensilsCrossed className="w-3.5 h-3.5" />
-          Back to Dashboard
+          Dashboard
         </Link>
       </div>
     </div>
@@ -314,6 +323,7 @@ export default function CheckoutPage() {
     totalPrice,
     clearCartDirect
   } = useCart()
+  const { addOrder } = useAppData()
 
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -468,31 +478,33 @@ export default function CheckoutPage() {
       restaurant: restaurantLabel,
       itemCount: cartCount,
       items: cartItems.map(item => ({ name: item.name, qty: item.quantity, price: item.price })),
-      total: finalTotal,
+      // ✅ Use field names matching RecentOrdersTable / mockDashboardData schema
+      totalAmount: finalTotal,
+      total: finalTotal,           // kept for OrderConfirmScreen
       discount: totalSavings,
       coupon: appliedCoupon?.code || null,
       paymentMethod: PAYMENT_METHODS.find(m => m.id === paymentMethod)?.name || paymentMethod,
       paymentStatus: 'Paid',
+      orderStatus: 'Preparing',    // ✅ matches RecentOrdersTable getStatusBadge key
+      status: 'Preparing',
       address: `${address.line1}${address.line2 ? ', ' + address.line2 : ''}, ${address.city} - ${address.pincode}`,
+      estimatedDelivery: eta,      // ✅ matches RecentOrdersTable + OrderDetailsModal schema
       eta,
       rider,
-      status: 'Preparing',
-      placedAt: new Date().toISOString(),
+      placedAt: 'Just now',
       customer: {
-        name: currentUser?.name || address.name,
-        email: currentUser?.email,
-        phone: address.phone,
-        avatar: currentUser?.avatar
+        name: currentUser?.name || address.name || 'Katru Satyanarayana',
+        email: currentUser?.email || 'satyanarayanayadav50@gmail.com',
+        phone: address.phone || currentUser?.phone || '+91 8179795623',
+        // ✅ fallback avatar so img tag never breaks
+        avatar: currentUser?.avatar || '/satyanarayana.jpg'
       }
     }
 
-    // Save to localStorage for order history
-    try {
-      const existing = JSON.parse(localStorage.getItem('foodbite_recent_orders') || '[]')
-      localStorage.setItem('foodbite_recent_orders', JSON.stringify([newOrder, ...existing]))
-    } catch (e) { console.error(e) }
+    // ✅ Use AppDataContext to register order (updates dashboard dynamically)
+    addOrder(newOrder)
 
-    // ⚠️ IMPORTANT: Set orderPlacedRef + confirmedOrder BEFORE clearCartDirect()
+    // ⚠️ Set orderPlacedRef + confirmedOrder BEFORE clearCartDirect()
     // so the useEffect guard never fires when cart becomes empty
     orderPlacedRef.current = true
     setConfirmedOrder(newOrder)
@@ -601,7 +613,7 @@ export default function CheckoutPage() {
                         <label className={labelCls}>Full Name *</label>
                         <input
                           className={inputCls(addrErrors.name)}
-                          placeholder="e.g. Sarah Connor"
+                          placeholder="e.g. Katru Satyanarayana"
                           value={address.name}
                           onChange={e => setAddress(a => ({ ...a, name: e.target.value }))}
                         />
@@ -611,7 +623,7 @@ export default function CheckoutPage() {
                         <label className={labelCls}>Phone Number *</label>
                         <input
                           className={inputCls(addrErrors.phone)}
-                          placeholder="+1 (555) 234-5678"
+                          placeholder="+91 8179795623"
                           value={address.phone}
                           onChange={e => setAddress(a => ({ ...a, phone: e.target.value }))}
                         />
